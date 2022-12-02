@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <style></style>
+  </head>
+  <body>
+    <canvas id="canvas" width="700px" height="700px"> </canvas>
+    <script>
+      const canvas = document.getElementById("canvas")
+      const ctx = canvas.getContext("2d")
+      // draw rect on canvas
+      // ctx.fillStyle = 'red';
+      // x, y, w, h
+      // ----- x, y 값만 계속 바꿔주면 된다.
+
+      // ctx.fillRect(0, 0, 20, 20);
+      // ctx.fillRect(21,0,20,20)
+      // ctx.fillRect(21,21,20,20)
+      // ctx.fillRect(100,100,20,20)
+      //! 변수가 몇개 필요 한지 정의한다.
+      // 어떤 목적으로 변수를 사용할 것인지 정의를 해야한다. 다음 계산을 위해서 !!
+      // 30 * 30 하면 900 번을 호출해야한다.
+      let arr = []
+      let bx = 0
+      let by = 0
+      let green = []
+      let block = []
+      let selected = []
+
+      document.addEventListener("keydown", (event) => {
+        const keyName = event.key
+
+        if (keyName === "ArrowUp" && by > 0) {
+          let a = arr.find((el) => el.bx === bx && el.by === by - 1)
+          if (a) {
+            ++by
+          }
+
+          if (selected.length > 0) {
+            let movingArr = block[selected[0].index].green
+            for (let i = 0; i < movingArr.length; i++) {
+              movingArr[i].j = --movingArr[i].j
+            }
+          }
+          --by
+        } else if (keyName === "ArrowDown" && by < 29) {
+          let a = arr.find((el) => el.bx === bx && el.by === by + 1)
+          if (a) {
+            --by
+          }
+
+          if (selected.length > 0) {
+            let movingArr = block[selected[0].index].green
+            for (let i = 0; i < movingArr.length; i++) {
+              movingArr[i].j = ++movingArr[i].j
+            }
+          }
+          ++by
+        } else if (keyName === "ArrowLeft" && bx > 0) {
+          let a = arr.find((el) => el.bx === bx - 1 && el.by === by)
+          if (a) {
+            ++bx
+          }
+
+          if (selected.length > 0) {
+            let movingArr = block[selected[0].index].green
+            for (let i = 0; i < movingArr.length; i++) {
+              movingArr[i].i = --movingArr[i].i
+            }
+          }
+          --bx
+        } else if (keyName === "ArrowRight" && bx < 29) {
+          let a = arr.find((el) => el.bx === bx + 1 && el.by === by)
+          if (a) {
+            --bx
+          }
+
+          if (selected.length > 0) {
+            let movingArr = block[selected[0].index].green
+            for (let i = 0; i < movingArr.length; i++) {
+              movingArr[i].i = ++movingArr[i].i
+            }
+          }
+          ++bx
+        } else if (event.code === "Space") {
+          arr.push({ bx, by })
+        } else if (keyName === "Backspace") {
+          delete block[selected[0].index]
+          block = block.filter((el) => el !== undefined)
+          selected.pop()
+        }
+        test(bx, by)
+      })
+
+      test()
+      function test(bx, by) {
+        for (let i = 0; i < 30; i++) {
+          for (let j = 0; j < 30; j++) {
+            if (i === bx && j === by) {
+              ctx.fillRect(i * 21, j * 21, 20, 20)
+              ctx.fillStyle = "blue"
+            } else {
+              for (let i = 0; i < arr.length; i++) {
+                ctx.fillStyle = "black"
+                ctx.fillRect(arr[i].bx * 21, arr[i].by * 21, 20, 20)
+              }
+              for (let i = 0; i < block.length; i++) {
+                for (let j = 0; j < block[i].green.length; j++) {
+                  ctx.fillRect(
+                    block[i].green[j].i * 21,
+                    block[i].green[j].j * 21,
+                    20,
+                    20
+                  )
+                  ctx.fillStyle = "LimeGreen"
+                }
+              }
+              if (selected.length > 0) {
+                for (let i = 0; i < selected[0].arr.length; i++) {
+                  ctx.fillRect(
+                    selected[0].arr[i].i * 21,
+                    selected[0].arr[i].j * 21,
+                    20,
+                    20
+                  )
+                  ctx.fillStyle = "green"
+                }
+              }
+              ctx.fillStyle = "LightGray"
+            }
+            ctx.fillRect(i * 21, j * 21, 20, 20)
+          }
+        }
+      }
+
+      canvas.addEventListener("mousedown", (e) => {
+        bx = Math.trunc(e.offsetX / 21) < 29 ? Math.trunc(e.offsetX / 21) : 29
+        by = Math.trunc(e.offsetY / 21) < 29 ? Math.trunc(e.offsetY / 21) : 29
+        const result = block.map((el) =>
+          el.green.find((box) => box.i === bx && box.j === by)
+        )
+
+        const index = result.findIndex((el) => el !== undefined)
+        if (index >= 0) {
+          let arr = block[index].green
+          selected = [{ index, arr }]
+        }
+        test(bx, by)
+      })
+
+      canvas.addEventListener("mouseup", (e) => {
+        let x =
+          Math.trunc(e.offsetX / 21) < 29 ? Math.trunc(e.offsetX / 21) : 29
+        let y =
+          Math.trunc(e.offsetY / 21) < 29 ? Math.trunc(e.offsetY / 21) : 29
+
+        if (bx === x && by === y) return
+        for (let i = bx; i <= x; i++) {
+          for (let j = by; j <= y; j++) {
+            green.push({ i, j })
+          }
+        }
+        block.push({ bx, green })
+        green = []
+        test(x, y)
+      })
+    </script>
+  </body>
+</html>
