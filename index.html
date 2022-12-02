@@ -110,24 +110,24 @@
               }
               for (let i = 0; i < block.length; i++) {
                 for (let j = 0; j < block[i].green.length; j++) {
+                  ctx.fillStyle = "LimeGreen"
                   ctx.fillRect(
                     block[i].green[j].i * 21,
                     block[i].green[j].j * 21,
                     20,
                     20
                   )
-                  ctx.fillStyle = "LimeGreen"
                 }
               }
               if (selected.length > 0) {
                 for (let i = 0; i < selected[0].arr.length; i++) {
+                  ctx.fillStyle = "green"
                   ctx.fillRect(
                     selected[0].arr[i].i * 21,
                     selected[0].arr[i].j * 21,
                     20,
                     20
                   )
-                  ctx.fillStyle = "green"
                 }
               }
               ctx.fillStyle = "LightGray"
