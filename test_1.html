@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <style></style>
+  </head>
+  <body>
+    <canvas id="canvas" width="700px" height="700px"> </canvas>
+    <script>
+      const canvas = document.getElementById("canvas")
+      const ctx = canvas.getContext("2d")
+
+      let blue = { x: 15, y: 15 }
+      const black = []
+
+      function render() {
+        // render gray
+        ctx.fillStyle = "gray"
+        for (let y = 0; y < 30; y++) {
+          for (let x = 0; x < 30; x++) {
+            ctx.fillRect(x * (20 + 1), y * (20 + 1), 20, 20)
+          }
+        }
+
+        // render black
+        ctx.fillStyle = "black"
+        for (b of black) {
+          ctx.fillRect(b.x * (20 + 1), b.y * (20 + 1), 20, 20)
+        }
+
+        // render blue
+        ctx.fillStyle = "blue"
+        ctx.fillRect(blue.x * (20 + 1), blue.y * (20 + 1), 20, 20)
+      }
+
+      function isDuplicate(x, y) {
+        for (b of black) {
+          if (b.x === x && b.y === y) {
+            return true
+          }
+        }
+        return false
+      }
+
+      document.addEventListener("keydown", (event) => {
+        let newBlue = { x: blue.x, y: blue.y }
+        if (event.code === "ArrowLeft") {
+          newBlue.x -= 1
+        } else if (event.code === "ArrowRight") {
+          newBlue.x += 1
+        } else if (event.code === "ArrowUp") {
+          newBlue.y -= 1
+        } else if (event.code === "ArrowDown") {
+          newBlue.y += 1
+        } else if (event.code === "Space") {
+          black.push({ x: blue.x, y: blue.y })
+        }
+        if (!isDuplicate(newBlue.x, newBlue.y)) {
+          blue = newBlue
+        }
+        render()
+      })
+
+      document.addEventListener("mousedown", (event) => {
+        const rect = canvas.getBoundingClientRect()
+        const x = event.clientX - rect.left
+        const y = event.clientY - rect.top
+        blue.x = Math.floor(x / 21)
+        blue.y = Math.floor(y / 21)
+        render()
+      })
+
+      render()
+    </script>
+  </body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <style></style>
+  </head>
+  <body>
+    <canvas id="canvas" width="700px" height="700px"> </canvas>
+    <script>
+      const canvas = document.getElementById("canvas")
+      const ctx = canvas.getContext("2d")
+
+      var allRects = []
+      var selected = -1
+      var dragging = false
+      var currentRect = null
+
+      function render() {
+        // render gray
+        drawRect({ left: 0, top: 0, right: 30, bottom: 30 }, "gray")
+
+        // render all rects
+        for (let i = 0; i < allRects.length; i++) {
+          const rect = allRects[i]
+          drawRect(rect, i === selected ? "darkgreen" : "green")
+        }
+
+        // render dragging rect
+        if (currentRect) {
+          drawRect(currentRect, "green")
+        }
+      }
+
+      function drawRect(rect, color) {
+        ctx.fillStyle = color
+        for (let y = rect.top; y <= rect.bottom; y++) {
+          for (let x = rect.left; x <= rect.right; x++) {
+            ctx.fillRect(x * (20 + 1), y * (20 + 1), 20, 20)
+          }
+        }
+      }
+
+      function positionFromEvent(event) {
+        const rect = canvas.getBoundingClientRect()
+        const x = Math.floor((event.clientX - rect.left) / (20 + 1))
+        const y = Math.floor((event.clientY - rect.top) / (20 + 1))
+        return { x, y }
+      }
+
+      function pointInRect(x, y) {
+        for (let i = 0; i < allRects.length; i++) {
+          const rect = allRects[i]
+          if (
+            x >= rect.left &&
+            x <= rect.right &&
+            y >= rect.top &&
+            y <= rect.bottom
+          ) {
+            return i
+          }
+        }
+        return -1
+      }
+
+      document.addEventListener("mousedown", (event) => {
+        const { x, y } = positionFromEvent(event)
+        const index = pointInRect(x, y)
+        if (index !== -1) {
+          selected = index
+        } else {
+          selected = -1
+          dragging = true
+          currentRect = { left: x, top: y, right: x, bottom: y }
+        }
+        render()
+      })
+
+      document.addEventListener("mousemove", (event) => {
+        const { x, y } = positionFromEvent(event)
+        if (dragging) {
+          currentRect = { ...currentRect, right: x, bottom: y }
+        }
+        render()
+      })
+
+      document.addEventListener("mouseup", (event) => {
+        const { x, y } = positionFromEvent(event)
+        if (dragging) {
+          allRects.push(currentRect)
+          currentRect = null
+          dragging = false
+        }
+        render()
+      })
+
+      render()
+    </script>
+  </body>
+</html>
